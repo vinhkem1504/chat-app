@@ -3,7 +3,7 @@ import { config } from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { connectDatabase } from './configs/db';
-
+import { authRoute } from './routes/auth.route';
 config();
 
 const app: Express = express();
@@ -17,9 +17,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 connectDatabase();
 
 //App route
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello');
-});
+app.use('/api/auth', authRoute);
 
 app.listen(PORT, () => {
   console.log('Server is running on port ', PORT);
