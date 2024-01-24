@@ -1,8 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { isEmail } from 'validator';
 import bcrypt from 'bcryptjs';
-import { NextFunction } from 'express';
-
 export interface IAccount {
   _id?: string;
   username: string;

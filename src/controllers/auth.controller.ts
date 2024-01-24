@@ -85,6 +85,8 @@ export const refreshToken = async (
 ) => {
   try {
     const refreshToken = req.body.refreshToken;
+    console.log(refreshToken);
+
     const payload = jwt.verify(
       refreshToken,
       process.env.APP_SECRET!
