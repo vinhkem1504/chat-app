@@ -1,10 +1,12 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
+import { User } from './user.model';
 
 export interface IFriendShip {
+  _id?: string;
   status: number;
   isFollow: boolean;
-  userId?: mongoose.Types.ObjectId;
-  friendId?: mongoose.Types.ObjectId;
+  userId: Types.ObjectId;
+  friendId: Types.ObjectId;
 }
 
 //block: -1
@@ -24,14 +26,14 @@ const friendShipSchema = new Schema<IFriendShip>(
       default: false,
     },
     userId: {
-      type: mongoose.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       required: true,
-      ref: 'User',
+      ref: User.name,
     },
     friendId: {
-      type: mongoose.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       required: true,
-      ref: 'User',
+      ref: User.name,
     },
   },
   { timestamps: true }

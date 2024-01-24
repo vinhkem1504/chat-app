@@ -1,4 +1,5 @@
 import mongoose, { Schema, Types } from 'mongoose';
+import { Account } from './account.model';
 
 export type TLocation = {
   lat: number;
@@ -37,12 +38,12 @@ const userSchema = new Schema<IUser>(
     avatar: {
       type: String,
       trim: true,
-      default: 'default avatar link',
+      default: '',
     },
     coverPhoto: {
       type: String,
       trim: true,
-      default: 'default cover photo link',
+      default: '',
     },
     address: {
       type: String,
@@ -54,7 +55,7 @@ const userSchema = new Schema<IUser>(
     accountId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'Account',
+      ref: Account.name,
     },
   },
   { timestamps: true }

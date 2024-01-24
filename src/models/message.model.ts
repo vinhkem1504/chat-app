@@ -1,11 +1,14 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 import { User } from './user.model';
 import { Group } from './group.model';
+import { Reaction } from './reaction.model';
 
 export interface IMessage {
-  senderId?: mongoose.Types.ObjectId;
-  receiverId?: mongoose.Types.ObjectId;
-  userSeenId?: mongoose.Types.ObjectId[];
+  _id?: string;
+  senderId: Types.ObjectId;
+  receiverId: Types.ObjectId;
+  userSeenId?: Types.ObjectId[];
+  reactionId?: Types.ObjectId;
   content?: string;
   images?: string[];
 }
@@ -21,18 +24,22 @@ const messageSchema = new Schema<IMessage>(
       default: [],
     },
     senderId: {
-      type: mongoose.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: User.name,
       required: true,
     },
     receiverId: {
-      type: mongoose.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: Group.name,
       required: true,
     },
     userSeenId: {
-      type: [mongoose.Types.ObjectId],
+      type: [Schema.Types.ObjectId],
       ref: User.name,
+    },
+    reactionId: {
+      type: Schema.Types.ObjectId,
+      ref: Reaction.name,
     },
   },
   { timestamps: true }

@@ -1,10 +1,11 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 import { User } from './user.model';
 
 export interface IGroup {
+  _id?: string;
   groupName: string;
-  groupAdmin?: mongoose.Types.ObjectId[];
-  groupMember?: mongoose.Types.ObjectId[];
+  groupAdmin: Types.ObjectId[];
+  groupMember: Types.ObjectId[];
 }
 
 const groupSchema = new Schema<IGroup>(
@@ -15,12 +16,12 @@ const groupSchema = new Schema<IGroup>(
       trim: true,
     },
     groupAdmin: {
-      type: [mongoose.Types.ObjectId],
+      type: [Schema.Types.ObjectId],
       ref: User.name,
       default: [],
     },
     groupMember: {
-      type: [mongoose.Types.ObjectId],
+      type: [Schema.Types.ObjectId],
       ref: User.name,
     },
   },
