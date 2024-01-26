@@ -2,26 +2,21 @@ import { Request, Response, NextFunction } from 'express';
 import { Account, IAccount } from '../models/account.model';
 import bcrypt from 'bcryptjs';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { StreamChat } from 'stream-chat';
+import mongoose from 'mongoose';
 
-const genarateAccessToken = (accountId: string) => {
-  const accessToken = jwt.sign(
-    { accountId: accountId },
-    process.env.APP_SECRET!,
-    {
-      expiresIn: '60m',
-    }
-  );
+const genarateAccessToken = (client: any, accountId: string) => {
+  const currentTime = Math.floor(Date.now() / 1000);
+  const expireTime = Math.floor(Date.now() / 1000) + 60 * 60;
+  const accessToken = client.createToken(accountId, expireTime, currentTime);
   return accessToken;
 };
 
-const genarateRefreshToken = (accountId: string) => {
-  const refreshToken = jwt.sign(
-    { accountId: accountId },
-    process.env.APP_SECRET!,
-    {
-      expiresIn: '7d',
-    }
-  );
+const genarateRefreshToken = (client: any, accountId: string) => {
+  const currentTime = Math.floor(Date.now() / 1000);
+  const expireTime = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
+  const refreshToken = client.createToken(accountId, expireTime, currentTime);
+
   return refreshToken;
 };
 
@@ -31,9 +26,13 @@ export const register = async (
   next: NextFunction
 ) => {
   try {
+    const client = StreamChat.getInstance(
+      process.env.STREAM_APP_API_KEY!,
+      process.env.APP_SECRET
+    );
     const account = await Account.create(req.body);
-    const accessToken = genarateAccessToken(account._id);
-    const refreshToken = genarateRefreshToken(account._id);
+    const accessToken = genarateAccessToken(client, account._id.toString());
+    const refreshToken = genarateRefreshToken(client, account._id.toString());
     res.status(200).json({
       status: 'success',
       data: account,
@@ -51,6 +50,11 @@ export const login = async (
   next: NextFunction
 ) => {
   try {
+    const client = StreamChat.getInstance(
+      process.env.STREAM_APP_API_KEY!,
+      process.env.APP_SECRET
+    );
+
     const account: IAccount | null = await Account.findOne({
       username: req.body.username,
     });
@@ -61,8 +65,11 @@ export const login = async (
     }
 
     if (bcrypt.compareSync(req.body.password, account.password)) {
-      const accessToken = genarateAccessToken(account._id!);
-      const refreshToken = genarateRefreshToken(account._id!);
+      const accessToken = genarateAccessToken(client, account._id!.toString());
+      const refreshToken = genarateRefreshToken(
+        client,
+        account._id!.toString()
+      );
       res.status(200).json({
         status: 'success',
         data: account,
@@ -85,16 +92,18 @@ export const refreshToken = async (
 ) => {
   try {
     const refreshToken = req.body.refreshToken;
-    console.log(refreshToken);
-
+    const client = StreamChat.getInstance(
+      process.env.STREAM_APP_API_KEY!,
+      process.env.APP_SECRET
+    );
     const payload = jwt.verify(
       refreshToken,
       process.env.APP_SECRET!
     ) as JwtPayload;
     const { accountId } = payload;
 
-    const newAccessToken = genarateAccessToken(accountId);
-    const newRefreshToken = genarateRefreshToken(accountId);
+    const newAccessToken = genarateAccessToken(client, accountId);
+    const newRefreshToken = genarateRefreshToken(client, accountId);
 
     res.status(200).json({
       status: 'success',
