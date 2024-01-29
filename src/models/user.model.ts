@@ -11,6 +11,7 @@ export interface IUser {
   firstName: string;
   lastName: string;
   birthDay: Date;
+  gender: Number;
   avatar: string;
   coverPhoto: string;
   phoneNumber: string;
@@ -34,6 +35,10 @@ const userSchema = new Schema<IUser>(
     },
     birthDay: {
       type: Date,
+      required: true,
+    },
+    gender: {
+      type: Number,
       required: true,
     },
     avatar: {

@@ -4,6 +4,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import { connectDatabase } from './configs/db';
 import { authRoute } from './routes/auth.route';
+import { userRoute } from './routes/user.route';
 config();
 
 const app: Express = express();
@@ -18,6 +19,7 @@ connectDatabase();
 
 //App route
 app.use('/api/auth', authRoute);
+app.use('/api/user', userRoute);
 
 app.listen(PORT, () => {
   console.log('Server is running on port ', PORT);

@@ -1,5 +1,6 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
+import { StreamChat } from 'stream-chat';
 
 export const verifyToken = async (
   req: Request,
@@ -7,7 +8,8 @@ export const verifyToken = async (
   next: NextFunction
 ) => {
   const authorization = req.header('authorization');
-  const token = authorization?.replace('Bear ', '');
+  const token = authorization?.replace('Bearer ', '');
+  console.log('tokern', token);
 
   if (!token || String(token) === 'null') {
     const err = new Error('Unauthorization');
@@ -16,8 +18,9 @@ export const verifyToken = async (
 
   try {
     const payload = jwt.verify(token, process.env.APP_SECRET!) as JwtPayload;
-    const { accountId } = payload;
-    req.body.accountId = accountId;
+    // const payload = await client.token
+    const { user_id } = payload;
+    req.body.userId = user_id;
     next();
   } catch (error) {
     next(error);
