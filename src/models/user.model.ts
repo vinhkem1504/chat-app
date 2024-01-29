@@ -13,6 +13,7 @@ export interface IUser {
   birthDay: Date;
   avatar: string;
   coverPhoto: string;
+  phoneNumber: string;
   bioInfo?: string;
   address: string;
   currentLocation?: TLocation;
@@ -44,6 +45,14 @@ const userSchema = new Schema<IUser>(
       type: String,
       trim: true,
       default: '',
+    },
+    phoneNumber: {
+      type: String,
+      trim: true,
+    },
+    bioInfo: {
+      type: String,
+      trim: true,
     },
     address: {
       type: String,

@@ -3,7 +3,6 @@ import { Account, IAccount } from '../models/account.model';
 import bcrypt from 'bcryptjs';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { StreamChat } from 'stream-chat';
-import mongoose from 'mongoose';
 
 const genarateAccessToken = (client: any, accountId: string) => {
   const currentTime = Math.floor(Date.now() / 1000);
@@ -30,9 +29,9 @@ export const register = async (
       process.env.STREAM_APP_API_KEY!,
       process.env.APP_SECRET
     );
-    const account = await Account.create(req.body);
-    const accessToken = genarateAccessToken(client, account._id.toString());
-    const refreshToken = genarateRefreshToken(client, account._id.toString());
+    const account: IAccount = await Account.create(req.body);
+    const accessToken = genarateAccessToken(client, account._id!.toString());
+    const refreshToken = genarateRefreshToken(client, account._id!.toString());
     res.status(200).json({
       status: 'success',
       data: account,
@@ -63,6 +62,12 @@ export const login = async (
       const err = new Error('Username not found');
       return next(err);
     }
+    const user = {
+      id: account._id!,
+      email: account.email,
+    };
+
+    await client.upsertUser(user);
 
     if (bcrypt.compareSync(req.body.password, account.password)) {
       const accessToken = genarateAccessToken(client, account._id!.toString());
@@ -96,14 +101,16 @@ export const refreshToken = async (
       process.env.STREAM_APP_API_KEY!,
       process.env.APP_SECRET
     );
+
     const payload = jwt.verify(
       refreshToken,
       process.env.APP_SECRET!
     ) as JwtPayload;
-    const { accountId } = payload;
 
-    const newAccessToken = genarateAccessToken(client, accountId);
-    const newRefreshToken = genarateRefreshToken(client, accountId);
+    const { user_id } = payload;
+
+    const newAccessToken = genarateAccessToken(client, user_id);
+    const newRefreshToken = genarateRefreshToken(client, user_id);
 
     res.status(200).json({
       status: 'success',
@@ -112,6 +119,17 @@ export const refreshToken = async (
         refreshToken: newRefreshToken,
       },
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createUserInfomation = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
   } catch (error) {
     next(error);
   }
