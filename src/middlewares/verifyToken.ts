@@ -9,7 +9,6 @@ export const verifyToken = async (
 ) => {
   const authorization = req.header('authorization');
   const token = authorization?.replace('Bearer ', '');
-  console.log('tokern', token);
 
   if (!token || String(token) === 'null') {
     const err = new Error('Unauthorization');
