@@ -27,15 +27,15 @@ const likeSchema = new Schema<ILike>(
     userId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: User.name,
+      ref: 'User',
     },
     postId: {
       type: Schema.Types.ObjectId,
-      ref: Post.name,
+      ref: 'Post',
     },
     commentId: {
       type: Schema.Types.ObjectId,
-      ref: Comment.name,
+      ref: 'Comment',
     },
   },
   { timestamps: true }

@@ -3,31 +3,24 @@ import { isEmail } from 'validator';
 import bcrypt from 'bcryptjs';
 export interface IAccount {
   _id?: string;
-  username: string;
-  password: string;
   email: string;
+  password: string;
 }
 
 const accountSchema = new Schema<IAccount>(
   {
-    username: {
-      type: String,
-      trim: true,
-      required: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      trim: true,
-      required: true,
-      minlength: [6, 'Password must be at 6 characters'],
-    },
     email: {
       type: String,
       trim: true,
       required: true,
       unique: true,
       validate: [isEmail, 'Email is invalid'],
+    },
+    password: {
+      type: String,
+      trim: true,
+      required: true,
+      minlength: [6, 'Password must be at 6 characters'],
     },
   },
   {

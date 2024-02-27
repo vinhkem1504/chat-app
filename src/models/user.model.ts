@@ -39,7 +39,6 @@ const userSchema = new Schema<IUser>(
     },
     gender: {
       type: Number,
-      required: true,
     },
     avatar: {
       type: String,
@@ -69,7 +68,7 @@ const userSchema = new Schema<IUser>(
     accountId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: Account.name,
+      ref: 'Account',
     },
   },
   { timestamps: true }

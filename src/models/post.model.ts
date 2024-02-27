@@ -24,11 +24,11 @@ const postSchema = new Schema<IPost>(
     userId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: User.name,
+      ref: 'User',
     },
     albumId: {
       type: Schema.Types.ObjectId,
-      ref: Album.name,
+      ref: 'Album',
     },
   },
   { timestamps: true }

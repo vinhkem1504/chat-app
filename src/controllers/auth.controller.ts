@@ -6,14 +6,14 @@ import { StreamChat } from 'stream-chat';
 import { IUser, User } from '../models/user.model';
 import mongoose from 'mongoose';
 
-const genarateAccessToken = (client: any, accountId: string) => {
+const generateAccessToken = (client: any, accountId: string) => {
   const currentTime = Math.floor(Date.now() / 1000);
   const expireTime = Math.floor(Date.now() / 1000) + 60 * 60 * 24;
   const accessToken = client.createToken(accountId, expireTime, currentTime);
   return accessToken;
 };
 
-const genarateRefreshToken = (client: any, accountId: string) => {
+const generateRefreshToken = (client: any, accountId: string) => {
   const currentTime = Math.floor(Date.now() / 1000);
   const expireTime = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7;
   const refreshToken = client.createToken(accountId, expireTime, currentTime);
@@ -43,8 +43,8 @@ export const register = async (
     };
     const newUser = await User.create(user);
 
-    const accessToken = genarateAccessToken(client, newUser._id!.toString());
-    const refreshToken = genarateRefreshToken(client, newUser._id!.toString());
+    const accessToken = generateAccessToken(client, newUser._id!.toString());
+    const refreshToken = generateRefreshToken(client, newUser._id!.toString());
     res.status(200).json({
       status: 'success',
       data: newUser,
@@ -73,6 +73,7 @@ export const login = async (
     const account: IAccount | null = await Account.findOne({
       username: req.body.username,
     });
+
     if (!account) {
       const err = new Error('Username not found');
       return next(err);
@@ -90,8 +91,8 @@ export const login = async (
     await client.upsertUser(streamUser);
 
     if (bcrypt.compareSync(req.body.password, account.password)) {
-      const accessToken = genarateAccessToken(client, user!._id!.toString());
-      const refreshToken = genarateRefreshToken(client, user!._id!.toString());
+      const accessToken = generateAccessToken(client, user!._id!.toString());
+      const refreshToken = generateRefreshToken(client, user!._id!.toString());
       res.status(200).json({
         status: 'success',
         data: user,
@@ -126,8 +127,8 @@ export const refreshToken = async (
 
     const { user_id } = payload;
 
-    const newAccessToken = genarateAccessToken(client, user_id);
-    const newRefreshToken = genarateRefreshToken(client, user_id);
+    const newAccessToken = generateAccessToken(client, user_id);
+    const newRefreshToken = generateRefreshToken(client, user_id);
 
     res.status(200).json({
       status: 'success',

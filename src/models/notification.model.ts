@@ -22,7 +22,7 @@ const notificationSchema = new Schema<INotification>(
     receiverId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: User.name,
+      ref: 'User',
     },
   },
   {

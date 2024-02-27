@@ -28,12 +28,12 @@ const friendShipSchema = new Schema<IFriendShip>(
     userId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: User.name,
+      ref: 'User',
     },
     friendId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: User.name,
+      ref: 'User',
     },
   },
   { timestamps: true }

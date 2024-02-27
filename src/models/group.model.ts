@@ -17,12 +17,12 @@ const groupSchema = new Schema<IGroup>(
     },
     groupAdmin: {
       type: [Schema.Types.ObjectId],
-      ref: User.name,
+      ref: 'User',
       default: [],
     },
     groupMember: {
       type: [Schema.Types.ObjectId],
-      ref: User.name,
+      ref: 'User',
     },
   },
   { timestamps: true }

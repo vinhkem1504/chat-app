@@ -23,12 +23,12 @@ const commentSchema = new Schema<IComment>(
     userId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: User.name,
+      ref: 'User',
     },
     postId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: Post.name,
+      ref: 'Post',
     },
     targetId: {
       type: Schema.Types.ObjectId,

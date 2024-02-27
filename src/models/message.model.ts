@@ -25,21 +25,21 @@ const messageSchema = new Schema<IMessage>(
     },
     senderId: {
       type: Schema.Types.ObjectId,
-      ref: User.name,
+      ref: 'User',
       required: true,
     },
     receiverId: {
       type: Schema.Types.ObjectId,
-      ref: Group.name,
+      ref: 'Group',
       required: true,
     },
     userSeenId: {
       type: [Schema.Types.ObjectId],
-      ref: User.name,
+      ref: 'User',
     },
     reactionId: {
       type: Schema.Types.ObjectId,
-      ref: Reaction.name,
+      ref: 'Reaction',
     },
   },
   { timestamps: true }
