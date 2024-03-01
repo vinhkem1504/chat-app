@@ -5,6 +5,10 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { StreamChat } from 'stream-chat';
 import { IUser, User } from '../models/user.model';
 import mongoose from 'mongoose';
+import dayjs from 'dayjs';
+import nodemailer from 'nodemailer';
+
+let userCache: { [key: string]: string } = {};
 
 const generateAccessToken = (client: any, accountId: string) => {
   const currentTime = Math.floor(Date.now() / 1000);
@@ -37,7 +41,7 @@ export const register = async (
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       phoneNumber: req.body.phoneNumber,
-      birthDay: req.body.birthDay || new Date(),
+      birthDay: dayjs(req.body.birthDay).toDate() || new Date(),
       gender: req.body.gender,
       accountId: new mongoose.Types.ObjectId(account._id!),
     };
@@ -137,6 +141,92 @@ export const refreshToken = async (
         refreshToken: newRefreshToken,
       },
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const sendMail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      secure: true,
+      auth: {
+        user: 'chatapp1504@gmail.com',
+        pass: 'dsev wjob nahw fkpw',
+      },
+    });
+    const targetEmail = req.body.email;
+    const verifyCode = generateOTP();
+    userCache = {
+      ...userCache,
+      [targetEmail]: verifyCode,
+    };
+    const info = await transporter.sendMail({
+      from: 'chatapp1504@gmail.com', // sender address
+      to: targetEmail, // list of receivers
+      subject: 'ChatApp Verification Code',
+      text: 'ChatApp Verification Code',
+      html: `<p>Mã xác nhận của bạn là: <b>${verifyCode}</b></p>`, // html body
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        message: 'Check your email to get verify code.',
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const generateOTP = () => {
+  const digits = '0123456789';
+  let OTP = '';
+  for (let i = 0; i < 6; i++) {
+    OTP += digits[Math.floor(Math.random() * 10)];
+  }
+  return OTP;
+};
+
+export const changePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.body.userId;
+    const email = req.body.email;
+    const newPassword = req.body.newPassword;
+    const verifyCode = req.body.verifyCode;
+    if (userId) {
+      const account = await Account.findOneAndUpdate(
+        { email: email },
+        { password: newPassword }
+      );
+
+      res.status(200).json({
+        status: 'success',
+        data: account,
+      });
+    }
+
+    if (verifyCode === userCache[email]) {
+      const account = await Account.findOneAndUpdate(
+        { email: email },
+        { password: newPassword }
+      );
+
+      res.status(200).json({
+        status: 'success',
+        data: account,
+      });
+    }
   } catch (error) {
     next(error);
   }
