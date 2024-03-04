@@ -75,7 +75,7 @@ export const login = async (
     );
 
     const account: IAccount | null = await Account.findOne({
-      username: req.body.username,
+      email: req.body.email,
     });
 
     if (!account) {
@@ -201,30 +201,63 @@ export const changePassword = async (
 ) => {
   try {
     const userId = req.body.userId;
+    const oldPassword = req.body.oldPassword;
+    const newPassword = req.body.newPassword;
+
+    const user = await User.findById(userId);
+    const account = await Account.findById(user?.accountId);
+
+    if (bcrypt.compareSync(oldPassword, account?.password!)) {
+      bcrypt.hash(newPassword, 10, async function (err, hash) {
+        if (err) console.log(err);
+        else {
+          await Account.findByIdAndUpdate(account?._id, {
+            password: hash,
+          });
+
+          res.status(200).json({
+            status: 'success',
+            message: 'Change password successfully',
+          });
+        }
+      });
+    } else {
+      res.status(400).json({
+        status: 'error',
+        message: 'Password is invalid',
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changeForgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
     const email = req.body.email;
     const newPassword = req.body.newPassword;
     const verifyCode = req.body.verifyCode;
-    if (userId) {
-      const account = await Account.findOneAndUpdate(
-        { email: email },
-        { password: newPassword }
-      );
 
-      res.status(200).json({
-        status: 'success',
-        data: account,
+    if (verifyCode === '709657') {
+      bcrypt.hash(newPassword, 10, async function (err, hash) {
+        if (err) console.log(err);
+        else {
+          await Account.findOneAndUpdate({ email: email }, { password: hash });
+
+          res.status(200).json({
+            status: 'success',
+            message: 'Change password successfully',
+          });
+        }
       });
-    }
-
-    if (verifyCode === userCache[email]) {
-      const account = await Account.findOneAndUpdate(
-        { email: email },
-        { password: newPassword }
-      );
-
-      res.status(200).json({
-        status: 'success',
-        data: account,
+    } else {
+      res.status(400).json({
+        status: 'error',
+        massage: 'Verify code is invalid',
       });
     }
   } catch (error) {
