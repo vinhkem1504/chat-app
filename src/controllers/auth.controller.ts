@@ -36,7 +36,12 @@ export const register = async (
       process.env.STREAM_APP_API_KEY!,
       process.env.APP_SECRET
     );
-    account = await Account.create(req.body);
+    const registerAccount: IAccount = {
+      email: req.body.email.toString().toLowerCase(),
+      password: req.body.password.toString().toLowerCase(),
+    };
+    account = await Account.create(registerAccount);
+
     const user: Partial<IUser> = {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
@@ -69,13 +74,16 @@ export const login = async (
   next: NextFunction
 ) => {
   try {
+    console.log({ user: req.body });
+
     const client = StreamChat.getInstance(
       process.env.STREAM_APP_API_KEY!,
       process.env.APP_SECRET
     );
+    console.log({ user: req.body });
 
     const account: IAccount | null = await Account.findOne({
-      email: req.body.email,
+      email: req.body.email.toString().toLowerCase(),
     });
 
     if (!account) {
@@ -88,13 +96,18 @@ export const login = async (
 
     const streamUser = {
       id: user?._id!,
-      name: user?.firstName!,
+      name: user?.firstName! + ' ' + user?.lastName,
       email: account.email,
     };
 
     await client.upsertUser(streamUser);
 
-    if (bcrypt.compareSync(req.body.password, account.password)) {
+    if (
+      bcrypt.compareSync(
+        req.body.password.toString().toLowerCase(),
+        account.password
+      )
+    ) {
       const accessToken = generateAccessToken(client, user!._id!.toString());
       const refreshToken = generateRefreshToken(client, user!._id!.toString());
       res.status(200).json({
