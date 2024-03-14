@@ -74,13 +74,10 @@ export const login = async (
   next: NextFunction
 ) => {
   try {
-    console.log({ user: req.body });
-
     const client = StreamChat.getInstance(
       process.env.STREAM_APP_API_KEY!,
       process.env.APP_SECRET
     );
-    console.log({ user: req.body });
 
     const account: IAccount | null = await Account.findOne({
       email: req.body.email.toString().toLowerCase(),
