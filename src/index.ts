@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import { connectDatabase } from './configs/db';
 import { authRoute } from './routes/auth.route';
 import { userRoute } from './routes/user.route';
+import { errorHandler } from './middlewares/errorHandler';
 config();
 
 const app: Express = express();
@@ -21,6 +22,8 @@ connectDatabase();
 app.use('/api/auth', authRoute);
 app.use('/api/user', userRoute);
 
+//Handle error
+app.use(errorHandler);
 app.listen(PORT, () => {
   console.log('Server is running on port ', PORT);
 });

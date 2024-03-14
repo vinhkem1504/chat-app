@@ -1,6 +1,6 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import { StreamChat } from 'stream-chat';
+import { IError, errorHandler } from './errorHandler';
 
 export const verifyToken = async (
   req: Request,
@@ -11,7 +11,9 @@ export const verifyToken = async (
   const token = authorization?.replace('Bearer ', '');
 
   if (!token || String(token) === 'null') {
-    const err = new Error('Unauthorization');
+    const err: IError = {
+      code: 401,
+    };
     return next(err);
   }
 
