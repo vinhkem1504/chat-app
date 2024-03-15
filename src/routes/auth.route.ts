@@ -5,6 +5,7 @@ import {
   refreshToken,
   sendMail,
   changeForgotPassword,
+  checkLogin,
 } from '../controllers/auth.controller';
 import { verifyToken } from '../middlewares/verifyToken';
 
@@ -15,4 +16,4 @@ authRoute.route('/login').post(login);
 authRoute.route('/refresh').post(refreshToken);
 authRoute.route('/sendmail').post(sendMail);
 authRoute.route('/change-forgot-password').post(changeForgotPassword);
-authRoute.route('/check').get(verifyToken);
+authRoute.route('/check').get(verifyToken, checkLogin);

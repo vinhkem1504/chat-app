@@ -274,3 +274,24 @@ export const changeForgotPassword = async (
     next(error);
   }
 };
+
+export const checkLogin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId } = req.body;
+    if (userId) {
+      const user = await User.findOne({
+        _id: userId,
+      });
+      res.status(200).json({
+        status: 'success',
+        data: user,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
