@@ -3,14 +3,14 @@ import { User } from './user.model';
 
 export interface IFriendShip {
   _id?: string;
-  status: number;
+  status?: number;
   isFollow: boolean;
   userId: Types.ObjectId;
   friendId: Types.ObjectId;
 }
 
 //block: -1
-//block: -1
+//normal: 0
 //request: 1
 //friend: 2
 
@@ -19,7 +19,7 @@ const friendShipSchema = new Schema<IFriendShip>(
     status: {
       type: Number,
       required: true,
-      default: 1,
+      default: 0,
     },
     isFollow: {
       type: Boolean,
