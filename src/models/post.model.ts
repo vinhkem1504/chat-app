@@ -6,6 +6,7 @@ export interface IPost {
   _id?: string;
   content: string;
   images: string[];
+  isDelete?: boolean;
   userId: Types.ObjectId;
   albumId?: Types.ObjectId;
 }
@@ -20,6 +21,10 @@ const postSchema = new Schema<IPost>(
     images: {
       type: [String],
       default: [],
+    },
+    isDelete: {
+      type: Boolean,
+      default: false,
     },
     userId: {
       type: Schema.Types.ObjectId,

@@ -1,5 +1,4 @@
 import mongoose, { Schema, Types } from 'mongoose';
-import { Account } from './account.model';
 
 export type TLocation = {
   lat: number;

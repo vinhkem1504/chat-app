@@ -31,7 +31,7 @@ export const errorHandler = (
   }
 
   //not found
-  if (error.code === 'ObjectId') {
+  if (error.code === 'ObjectId' || error.code === 404) {
     error.statusCode = 404;
     error.message = 'Not found!';
   }

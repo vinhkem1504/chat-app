@@ -6,8 +6,7 @@ import { Comment } from './comment.model';
 export interface ILike {
   _id?: string;
   userId: Types.ObjectId;
-  postId?: Types.ObjectId;
-  commentId?: Types.ObjectId;
+  targetId?: Types.ObjectId;
   type: number;
 }
 
@@ -29,13 +28,8 @@ const likeSchema = new Schema<ILike>(
       required: true,
       ref: 'User',
     },
-    postId: {
+    targetId: {
       type: Schema.Types.ObjectId,
-      ref: 'Post',
-    },
-    commentId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Comment',
     },
   },
   { timestamps: true }

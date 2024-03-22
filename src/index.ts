@@ -6,6 +6,7 @@ import { connectDatabase } from './configs/db';
 import { authRoute } from './routes/auth.route';
 import { userRoute } from './routes/user.route';
 import { errorHandler } from './middlewares/errorHandler';
+import { postRoute } from './routes/post.route';
 config();
 
 const app: Express = express();
@@ -21,6 +22,7 @@ connectDatabase();
 //App route
 app.use('/api/auth', authRoute);
 app.use('/api/user', userRoute);
+app.use('/api/posts', postRoute);
 
 //Handle error
 app.use(errorHandler);
