@@ -39,10 +39,8 @@ export const getPostById = async (
 ) => {
   try {
     const { postId } = req.params;
-    const { userId } = req.body;
     const post = await Post.findById(postId).then(async (post) => {
       const likes = await Like.find({
-        userId,
         targetId: post?._id,
       }).select(['type']);
 
@@ -80,7 +78,6 @@ export const getFriendPosts = async (
       return await Promise.all(
         posts.map(async (post) => {
           const likes = await Like.find({
-            userId,
             targetId: post._id,
           }).select(['type']);
 
@@ -113,7 +110,6 @@ export const getMyPosts = async (
       return await Promise.all(
         posts.map(async (post) => {
           const likes = await Like.find({
-            userId,
             targetId: post._id,
           }).select(['type']);
 
@@ -279,13 +275,24 @@ export const getCommentByPost = async (
 ) => {
   try {
     const { postId } = req.params;
-    console.log({ postId });
-
     const comments = await Comment.aggregate([
       {
         $match: {
           postId: new mongoose.Types.ObjectId(postId),
           level: 1,
+        },
+      },
+      {
+        $lookup: {
+          from: 'likes',
+          localField: '_id',
+          foreignField: 'targetId',
+          as: 'likes',
+        },
+      },
+      {
+        $addFields: {
+          likeNumber: { $size: '$likes' },
         },
       },
       {
@@ -301,6 +308,19 @@ export const getCommentByPost = async (
       },
       {
         $lookup: {
+          from: 'likes',
+          localField: 'first_replies._id',
+          foreignField: 'targetId',
+          as: 'first_replies.likes',
+        },
+      },
+      {
+        $addFields: {
+          'first_replies.likeNumber': { $size: '$first_replies.likes' },
+        },
+      },
+      {
+        $lookup: {
           from: 'comments',
           localField: 'first_replies._id',
           foreignField: 'targetId',
@@ -308,15 +328,21 @@ export const getCommentByPost = async (
         },
       },
       {
-        $group: {
-          _id: '$_id',
-          content: { $first: '$content' },
-          image: { $first: '$image' },
-          userId: { $first: '$userId' },
-          postId: { $first: '$postId' },
-          createdAt: { $first: '$createdAt' },
-          updatedAt: { $first: '$updatedAt' },
-          first_replies: { $push: '$first_replies' },
+        $unwind: '$first_replies.second_replies', // Unwind the array before the next lookup
+      },
+      {
+        $lookup: {
+          from: 'likes',
+          localField: 'first_replies.second_replies._id',
+          foreignField: 'targetId',
+          as: 'first_replies.second_replies.likes',
+        },
+      },
+      {
+        $addFields: {
+          'first_replies.second_replies.likeNumber': {
+            $size: '$first_replies.second_replies.likes',
+          },
         },
       },
       {
