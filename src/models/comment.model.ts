@@ -9,6 +9,7 @@ export interface IComment {
   userId: Types.ObjectId;
   postId: Types.ObjectId;
   targetId: Types.ObjectId;
+  level: number;
 }
 
 const commentSchema = new Schema<IComment>(
@@ -32,8 +33,12 @@ const commentSchema = new Schema<IComment>(
     },
     targetId: {
       type: Schema.Types.ObjectId,
-      required: true,
       ref: 'Comment',
+    },
+    level: {
+      type: Number,
+      required: true,
+      default: 1,
     },
   },
   { timestamps: true }

@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import { IError } from '../middlewares/errorHandler';
 import { ILike, Like } from '../models/like.model';
 import { compare } from 'bcryptjs';
+import { Comment, IComment } from '../models/comment.model';
 
 export const creatPost = async (
   req: Request,
@@ -187,11 +188,7 @@ export const updatePost = async (
   }
 };
 
-export const likePost = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const like = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId, targetId } = req.body;
     const newLike: Partial<ILike> = {
@@ -210,39 +207,194 @@ export const likePost = async (
   }
 };
 
-export const getLikesByPost = async (
+// export const getLikesByPost = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const { userId, postId } = req.body;
+//     const likes = await Like.find({
+//       userId,
+//       targetId: postId,
+//     });
+//     res.status(200).json({
+//       message: 'success',
+//       data: likes,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+export const unLike = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { userId, postId } = req.body;
-    const likes = await Like.find({
+    const { userId, targetId } = req.body;
+    const like = await Like.findOneAndDelete({
       userId,
-      targetId: postId,
+      targetId: targetId,
     });
     res.status(200).json({
-      message: 'success',
-      data: likes,
+      message: 'delete success',
+      like,
     });
   } catch (error) {
     next(error);
   }
 };
 
-export const unLikePost = async (
+export const comment = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { userId, postId } = req.body;
-    const like = await Like.findOneAndDelete({
+    const { userId, content, postId, targetId, level } = req.body;
+
+    const newComment = await Comment.create({
+      content,
       userId,
-      targetId: postId,
+      postId,
+      targetId,
+      level,
     });
+
     res.status(200).json({
-      message: 'delete success',
+      status: 'success',
+      data: newComment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getCommentByPost = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { postId } = req.params;
+    console.log({ postId });
+
+    const comments = await Comment.aggregate([
+      {
+        $match: {
+          postId: new mongoose.Types.ObjectId(postId),
+          level: 1,
+        },
+      },
+      {
+        $lookup: {
+          from: 'comments',
+          localField: '_id',
+          foreignField: 'targetId',
+          as: 'first_replies',
+        },
+      },
+      {
+        $unwind: '$first_replies', // Unwind the array before the next lookup
+      },
+      {
+        $lookup: {
+          from: 'comments',
+          localField: 'first_replies._id',
+          foreignField: 'targetId',
+          as: 'first_replies.second_replies',
+        },
+      },
+      {
+        $group: {
+          _id: '$_id',
+          content: { $first: '$content' },
+          image: { $first: '$image' },
+          userId: { $first: '$userId' },
+          postId: { $first: '$postId' },
+          createdAt: { $first: '$createdAt' },
+          updatedAt: { $first: '$updatedAt' },
+          first_replies: { $push: '$first_replies' },
+        },
+      },
+      {
+        $sort: {
+          createdAt: 1,
+          'first_replies.createdAt': 1,
+          'first_replies.second_replies.createdAt': 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: comments,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateComment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId, commentId, content } = req.body;
+
+    const updateComment = await Comment.findOneAndUpdate(
+      {
+        _id: commentId,
+        userId,
+      },
+      {
+        content,
+      },
+      {
+        returnDocument: 'after',
+      }
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: updateComment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteComment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { commentId } = req.body;
+    await Comment.find({
+      targetId: commentId,
+    }).then((replies) => {
+      replies.map(async (replyItem) => {
+        if (replyItem) {
+          await Comment.deleteMany({
+            _id: replyItem._id,
+          });
+        }
+      });
+    });
+
+    await Comment.deleteMany({
+      targetId: commentId,
+    });
+
+    await Comment.findByIdAndDelete(commentId);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'deleted',
     });
   } catch (error) {
     next(error);
