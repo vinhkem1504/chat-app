@@ -93,11 +93,13 @@ export const login = async (
 
     const streamUser = {
       id: user?._id!,
-      name: user?.firstName! + ' ' + user?.lastName,
+      name: `${user?.firstName! + ' ' + user?.lastName!}`,
+      displayName: `${user?.firstName! + ' ' + user?.lastName!}`,
       email: account.email,
     };
 
-    await client.upsertUser(streamUser);
+    const resa = await client.upsertUser(streamUser);
+    // console.log({ user: resa.users });
 
     if (
       bcrypt.compareSync(

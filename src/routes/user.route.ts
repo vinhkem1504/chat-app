@@ -3,6 +3,7 @@ import { verifyToken } from '../middlewares/verifyToken';
 import {
   followUser,
   getFriendRequestList,
+  getListFriend,
   getUserInfomation,
   responseFriendRequest,
   sendRequestFriend,
@@ -16,6 +17,7 @@ userRoute.route('/').get(verifyToken, getUserInfomation);
 userRoute.route('/update').post(verifyToken, updateUserInfomation);
 userRoute.route('/change-password').post(verifyToken, changePassword);
 userRoute.route('/update').post(verifyToken, updateUserInfomation);
+userRoute.route('/friend').get(verifyToken, getListFriend);
 userRoute.route('/friend/add-friend').post(verifyToken, sendRequestFriend);
 userRoute.route('/friend/follow').post(verifyToken, followUser);
 userRoute

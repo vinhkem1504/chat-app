@@ -236,3 +236,68 @@ export const getFriendRequestList = async (
     next(error);
   }
 };
+
+export const getListFriend = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId } = req.body;
+    const friends = await User.aggregate([
+      {
+        $lookup: {
+          from: 'friendships',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'friendStatus',
+        },
+      },
+      {
+        $match: {
+          'friendStatus.friendId': new mongoose.Types.ObjectId(userId),
+          'friendStatus.status': 2,
+        },
+      },
+      {
+        $sort: {
+          firstName: 1,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          firstName: 1,
+          lastName: 1,
+          avatar: 1,
+          coverPhoto: 1,
+          birthDay: 1,
+          gender: 1,
+          phoneNumber: 1,
+          bioInfo: 1,
+          address: 1,
+          currentLocation: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: friends,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createGroup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId, members } = req.body;
+  } catch (error) {
+    next(error);
+  }
+};
