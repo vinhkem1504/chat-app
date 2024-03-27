@@ -1,6 +1,7 @@
 import express from 'express';
 import { verifyToken } from '../middlewares/verifyToken';
 import {
+  createGroup,
   followUser,
   getFriendRequestList,
   getListFriend,
@@ -24,3 +25,4 @@ userRoute
   .route('/friend/response-request')
   .post(verifyToken, responseFriendRequest);
 userRoute.route('/friend/list-request').get(verifyToken, getFriendRequestList);
+userRoute.route('/group/create').post(verifyToken, createGroup);

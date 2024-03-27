@@ -12,8 +12,8 @@ const groupSchema = new Schema<IGroup>(
   {
     groupName: {
       type: String,
-      required: true,
       trim: true,
+      default: '',
     },
     groupAdmin: {
       type: [Schema.Types.ObjectId],

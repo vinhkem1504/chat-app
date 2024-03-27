@@ -3,6 +3,7 @@ import { User } from '../models/user.model';
 import { FriendShip, IFriendShip } from '../models/friendship.model';
 import mongoose from 'mongoose';
 import { IError } from '../middlewares/errorHandler';
+import { Group } from '../models/group.model';
 
 export const updateUserInfomation = async (
   req: Request,
@@ -296,7 +297,90 @@ export const createGroup = async (
   next: NextFunction
 ) => {
   try {
-    const { userId, members } = req.body;
+    const { members, groupName } = req.body;
+    const group = await Group.create({
+      groupName,
+      groupMember: members.map(
+        (member: string) => new mongoose.Types.ObjectId(member)
+      ),
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: group,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateGroupName = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { groupId, groupName } = req.body;
+    const group = await Group.findByIdAndUpdate(groupId, {
+      groupName,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: group,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const removeMemberFromGroup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { groupId, memberId } = req.body;
+
+    const group = await Group.findById(groupId).then(async (group) => {
+      await Group.findByIdAndUpdate(group?._id, {
+        groupMember: group?.groupMember.filter(
+          (memberItem) =>
+            memberItem._id !== new mongoose.Types.ObjectId(memberId)
+        ),
+      });
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: group,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addMemberIntoGroup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { groupId, memberId } = req.body;
+
+    const group = await Group.findById(groupId).then(async (group) => {
+      await Group.findByIdAndUpdate(group?._id, {
+        groupMember: [
+          ...group?.groupMember!,
+          new mongoose.Types.ObjectId(memberId),
+        ],
+      });
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: group,
+    });
   } catch (error) {
     next(error);
   }
