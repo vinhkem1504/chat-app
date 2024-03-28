@@ -5,6 +5,7 @@ import {
   followUser,
   getFriendRequestList,
   getListFriend,
+  getUserById,
   getUserInfomation,
   responseFriendRequest,
   sendRequestFriend,
@@ -15,6 +16,7 @@ import { changePassword } from '../controllers/auth.controller';
 export const userRoute = express.Router();
 
 userRoute.route('/').get(verifyToken, getUserInfomation);
+userRoute.route('/:targetUserId').get(verifyToken, getUserById);
 userRoute.route('/update').post(verifyToken, updateUserInfomation);
 userRoute.route('/change-password').post(verifyToken, changePassword);
 userRoute.route('/update').post(verifyToken, updateUserInfomation);

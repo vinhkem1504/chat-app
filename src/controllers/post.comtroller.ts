@@ -291,11 +291,6 @@ export const getCommentByPost = async (
         },
       },
       {
-        $addFields: {
-          likeNumber: { $size: '$likes' },
-        },
-      },
-      {
         $lookup: {
           from: 'comments',
           localField: '_id',
@@ -304,7 +299,10 @@ export const getCommentByPost = async (
         },
       },
       {
-        $unwind: '$first_replies', // Unwind the array before the next lookup
+        $unwind: {
+          path: '$first_replies',
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
         $lookup: {
@@ -312,11 +310,6 @@ export const getCommentByPost = async (
           localField: 'first_replies._id',
           foreignField: 'targetId',
           as: 'first_replies.likes',
-        },
-      },
-      {
-        $addFields: {
-          'first_replies.likeNumber': { $size: '$first_replies.likes' },
         },
       },
       {
@@ -328,7 +321,10 @@ export const getCommentByPost = async (
         },
       },
       {
-        $unwind: '$first_replies.second_replies', // Unwind the array before the next lookup
+        $unwind: {
+          path: '$first_replies.second_replies',
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
         $lookup: {
@@ -336,13 +332,6 @@ export const getCommentByPost = async (
           localField: 'first_replies.second_replies._id',
           foreignField: 'targetId',
           as: 'first_replies.second_replies.likes',
-        },
-      },
-      {
-        $addFields: {
-          'first_replies.second_replies.likeNumber': {
-            $size: '$first_replies.second_replies.likes',
-          },
         },
       },
       {

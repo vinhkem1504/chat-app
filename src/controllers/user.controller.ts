@@ -44,6 +44,78 @@ export const getUserInfomation = async (
   }
 };
 
+export const getUserById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { targetUserId } = req.params;
+    const user = await User.aggregate([
+      {
+        $lookup: {
+          from: 'posts',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'posts',
+        },
+      },
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(targetUserId),
+          'posts.isDelete': false,
+        },
+      },
+      {
+        $unwind: '$posts',
+      },
+      {
+        $lookup: {
+          from: 'likes',
+          localField: 'posts._id',
+          foreignField: 'targetId',
+          as: 'posts.likes',
+        },
+      },
+      {
+        $group: {
+          _id: '$_id',
+          user: { $first: '$$ROOT' },
+          posts: { $push: '$posts' },
+        },
+      },
+      {
+        $project: {
+          'user._id': 1,
+          'user.firstName': 1,
+          'user.lastName': 1,
+          'user.birthDay': 1,
+          'user.gender': 1,
+          'user.avatar': 1,
+          'user.coverPhoto': 1,
+          'user.phoneNumber': 1,
+          'user.bioInfo': 1,
+          'user.address': 1,
+          'user.currentLocation': 1,
+          posts: 1,
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: { $mergeObjects: ['$user', { posts: '$posts' }] },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const sendRequestFriend = async (
   req: Request,
   res: Response,
